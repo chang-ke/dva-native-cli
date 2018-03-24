@@ -1,0 +1,21 @@
+{
+  "name": "dva-native-cli",
+  "version": "0.0.1",
+  "description": "The dva command line utility for react-native.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danmin25/dva-native-cli"
+  },
+  "homepage": "https://github.com/danmin25/dva-native-cli",
+  "mail": "danmin25 <15555140895@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "dva-native": "./bin/dva-native.js"
+  },
+  "engines": {
+    "node": ">=7.6.0"
+  }
+}
