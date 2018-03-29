@@ -3,6 +3,8 @@ const path = require("path");
 const fs = require("fs");
 const readline = require("readline");
 const help = require("./helper");
+const program = require("commander");
+const shell = require("shelljs");
 const exec = require("child_process").exec;
 const argv = process.argv.slice(2);
 const cwdPath = process.cwd();
@@ -12,60 +14,59 @@ const projectName = argv[1];
 const command = argv[0];
 const targetPath = `${cwdPath}/${projectName}`;
 const backupPath = `${cwdPath}/.${projectName}`;
-
+const aaa = require("../utils/commander");
+aaa
+  .parse(process.argv)
+  .option("-h, --help", help)
+  .option("-v, --version", () => console.log(package.version))
+  .command("new <233>")
+  .action(res => {
+    console.log(res+1);
+  });
 function installReactNativeRename() {
   return new Promise((resolve, reject) => {
-    exec("npm install react-native-rename -g", err => {
+    exec("npm install react-native-rename --registry=http://registry.cnpmjs.org", err => {
       if (err) {
-        reject(err);
+        exec("npm install react-native-rename");
       }
       resolve();
     });
   });
 }
 
-(async function() {
+/*(async function() {
   installReactNativeRename();
-  if (projectName === undefined) {
-    if (command === "--help" || command === "-h") {
-      help();
-      process.exit(0);
-    }
-    if (command === "--version" || command === "-v") {
-      console.log(package.version);
-      process.exit(0);
-    }
-  } else {
-    if (command === "init") {
-      if (fsExistsSync(targetPath)) {
-        //if exits
-        if (await confirm()) {
-          try {
-            rmdirR(targetPath);
-          } catch (error) {
-            console.log(error);
-            process.exit();
-          }
-          /*if (traverse(templatePath, targetPath)) {
-            install();
-          }*/
+  program.option("-h", "help");
+  program.option("-v, --version", help);
+  program.command("new <projectName>").action(projectName => {
+    //console.log(projectName);
+  });
+  program.parse(process.argv);
+  if (command === "init") {
+    if (fsExistsSync(targetPath)) {
+      if (await confirm()) {
+        try {
+          shell.rm("-rf", targetPath);
+        } catch (error) {
+          console.log(error);
+          process.exit();
         }
-      } else {
-        //not exits
-        fs.mkdirSync(targetPath);
         if (traverse(templatePath, targetPath)) {
           install();
         }
       }
+    } else {
+      fs.mkdirSync(targetPath);
+      if (traverse(templatePath, targetPath)) {
+        install();
+      }
     }
   }
-  if (command !== "init") {
-    console.warn(
+
+  /*console.warn(
       `You should use dva-native init <ProjectName> to create you project, do not use dva-native ${command}`
     );
-    process.exit(0);
-  }
-})();
+})();*/
 
 function mkTargetDir() {
   fs.mkdirSync(targetPath);
@@ -116,33 +117,6 @@ function traverse(templatePath, targetPath) {
     return false;
   }
   return true;
-}
-
-function rmdirR(targetPath) {
-  function rmdir(targetPath) {
-    try {
-      const paths = fs.readdirSync(targetPath);
-      paths.forEach(_path => {
-        const _targetPath = path.resolve(targetPath, _path);
-        if (fs.statSync(_targetPath).isDirectory()) {
-          rmdir(_targetPath);
-          fs.rmdirSync(_targetPath);
-        } else {
-          fs.unlinkSync(_targetPath);
-        }
-      });
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-    return true;
-  }
-  if (rmdir()) {
-    return true;
-  } else {
-    return false;
-  }
-  fs.rmdirSync(targetPath)
 }
 
 function install() {
