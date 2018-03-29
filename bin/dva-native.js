@@ -3,26 +3,13 @@ const path = require("path");
 const fs = require("fs");
 const readline = require("readline");
 const help = require("./helper");
-const program = require("commander");
 const shell = require("shelljs");
 const exec = require("child_process").exec;
-const argv = process.argv.slice(2);
 const cwdPath = process.cwd();
 const package = require("../package.json");
 const templatePath = path.resolve(__dirname, "../template");
-const projectName = argv[1];
-const command = argv[0];
-const targetPath = `${cwdPath}/${projectName}`;
-const backupPath = `${cwdPath}/.${projectName}`;
-const aaa = require("../utils/commander");
-aaa
-  .parse(process.argv)
-  .option("-h, --help", help)
-  .option("-v, --version", () => console.log(package.version))
-  .command("new <233>")
-  .action(res => {
-    console.log(res+1);
-  });
+const program = require("../utils/commander");
+
 function installReactNativeRename() {
   return new Promise((resolve, reject) => {
     exec("npm install react-native-rename --registry=http://registry.cnpmjs.org", err => {
@@ -34,36 +21,46 @@ function installReactNativeRename() {
   });
 }
 
-/*(async function() {
-  installReactNativeRename();
-  program.option("-h", "help");
-  program.option("-v, --version", help);
-  program.command("new <projectName>").action(projectName => {
-    //console.log(projectName);
-  });
-  program.parse(process.argv);
-  if (command === "init") {
-    if (fsExistsSync(targetPath)) {
-      if (await confirm()) {
-        try {
-          shell.rm("-rf", targetPath);
-        } catch (error) {
-          console.log(error);
-          process.exit();
-        }
-        if (traverse(templatePath, targetPath)) {
-          install();
-        }
-      }
-    } else {
-      fs.mkdirSync(targetPath);
-      if (traverse(templatePath, targetPath)) {
-        install();
-      }
-    }
-  }
+function printVersion() {
+  console.log(package.version);
+}
 
-  /*console.warn(
+(function() {
+  try {
+    installReactNativeRename();
+    program
+      .option("-h, --help", help)
+      .option("-v, --version", printVersion)
+      .command("new <projectName>")
+      .action(async projectName => {
+        const targetPath = `${cwdPath}/${projectName}`;
+        const backupPath = `${cwdPath}/.${projectName}`;
+        if (fsExistsSync(targetPath)) {
+          if (await confirm()) {
+            try {
+              shell.rm("-rf", targetPath);
+            } catch (error) {
+              console.log(error);
+              process.exit();
+            }
+            fs.mkdirSync(targetPath);
+            if (traverse(templatePath, targetPath)) {
+              installDependencies(projectName);
+            }
+          }
+        } else {
+          fs.mkdirSync(targetPath);
+          if (traverse(templatePath, targetPath)) {
+            installDependencies(projectName);
+          }
+        }
+      })
+      .parse(process.argv);
+  } catch (error) {
+    console.log(error);
+  }
+})();
+/*console.warn(
       `You should use dva-native init <ProjectName> to create you project, do not use dva-native ${command}`
     );
 })();*/
@@ -80,7 +77,9 @@ function fsExistsSync(path) {
   }
   return true;
 }
-
+function copyFile(_targetPath, _templatePath) {
+  fs.writeFileSync(_targetPath, fs.readFileSync(_templatePath), "utf-8");
+}
 function confirm() {
   const terminal = readline.createInterface({
     input: process.stdin,
@@ -119,9 +118,9 @@ function traverse(templatePath, targetPath) {
   return true;
 }
 
-function install() {
+function installDependencies(projectName) {
   console.log("\ninstalling...");
-  exec(`cd ${projectName} && npm install`, err => {
+  shell.exec(`cd ${projectName} && npm install`, err => {
     if (err) {
       console.log(err);
       process.exit();
@@ -139,8 +138,4 @@ Happy hacking!`
       );
     }
   });
-}
-function copyFile(_targetPath, _templatePath) {
-  fs.writeFileSync(_targetPath, fs.readFileSync(_templatePath), "utf-8");
-  //fs.createReadStream(_targetPath).pipe(fs.createWriteStream(_templatePath));
 }

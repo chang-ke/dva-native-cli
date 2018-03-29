@@ -3,6 +3,7 @@ const Commander = function() {
   this.commands = [];
   this.callback = [];
   this.options = [];
+  this.actions = [];
 };
 
 Commander.prototype.option = function(option, cb) {
@@ -17,7 +18,11 @@ Commander.prototype.command = function(cmd) {
 Commander.prototype.action = function(cb) {
   const cmd = this.commands.shift();
   const length = cmd.match(/<.+>/).length;
-  cb(...this.argvs.slice(length));
+  this.actions.push(function() {
+    if (this.argvs[0] === cmd.split(" ")[0]) {
+      cb(...this.argvs.slice(length));
+    }
+  });
   return this;
 };
 Commander.prototype.parse = function(argvs) {
@@ -40,5 +45,9 @@ Commander.prototype.run = function() {
       });
     });
   });
+  this.actions.forEach(action=>{
+    action();
+  })
 };
+
 module.exports = new Commander();

@@ -14,11 +14,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "cheerio": "^0.22.0",
     "colors": "^1.1.2",
     "commander": "^2.9.0",
-    "dva-cli": "^0.7.8",
-    "node-replace": "^0.3.3",
     "react-native-rename": "^2.2.2",
     "shelljs": "^0.7.7"
   },
