@@ -11,25 +11,33 @@ Commander.prototype.option = function(option, cb) {
   this.callback.push(cb);
   return this;
 };
+
 Commander.prototype.command = function(cmd) {
   this.commands.push(cmd);
   return this;
 };
-Commander.prototype.action = function(cb) {
+
+Commander.prototype.action = function(fn) {
   const cmd = this.commands.shift();
   const length = cmd.match(/<.+>/).length;
-  this.actions.push(function() {
-    if (this.argvs[0] === cmd.split(" ")[0]) {
-      cb(...this.argvs.slice(length));
+  this.actions.push(() => {
+    if (cmd && this.argvs[0] === cmd.split(" ")[0]) {
+      fn(...this.argvs.slice(length));
     }
   });
   return this;
 };
+
+Commander.prototype.finally = function(fn){
+
+}
+
 Commander.prototype.parse = function(argvs) {
   this.argvs = argvs.slice(2);
   this.run();
   return this;
 };
+
 Commander.prototype.run = function() {
   this.options.forEach((option, index) => {
     option.split(", ").forEach(item => {
@@ -45,9 +53,9 @@ Commander.prototype.run = function() {
       });
     });
   });
-  this.actions.forEach(action=>{
+  this.actions.forEach(action => {
     action();
-  })
+  });
 };
 
 module.exports = new Commander();

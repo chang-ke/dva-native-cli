@@ -4,7 +4,7 @@ const fs = require("fs");
 const readline = require("readline");
 const help = require("./helper");
 const shell = require("shelljs");
-const exec = require("child_process").exec;
+const colors = require("colors");
 const cwdPath = process.cwd();
 const package = require("../package.json");
 const templatePath = path.resolve(__dirname, "../template");
@@ -12,58 +12,26 @@ const program = require("../utils/commander");
 
 function installReactNativeRename() {
   return new Promise((resolve, reject) => {
-    exec("npm install react-native-rename --registry=http://registry.cnpmjs.org", err => {
-      if (err) {
-        exec("npm install react-native-rename");
-      }
+    if (shell.which("git")) {
       resolve();
-    });
+    } else {
+      shell.exec("npm install react-native-rename -g --registry=http://registry.cnpmjs.org", err => {
+        if (err) {
+          shell.exec("npm install react-native-rename -g", err => {
+            if (err) {
+              reject(err);
+            }
+          });
+        }
+        resolve();
+      });
+    }
   });
 }
 
 function printVersion() {
   console.log(package.version);
 }
-
-(function() {
-  try {
-    installReactNativeRename();
-    program
-      .option("-h, --help", help)
-      .option("-v, --version", printVersion)
-      .command("new <projectName>")
-      .action(async projectName => {
-        const targetPath = `${cwdPath}/${projectName}`;
-        const backupPath = `${cwdPath}/.${projectName}`;
-        if (fsExistsSync(targetPath)) {
-          if (await confirm()) {
-            try {
-              shell.rm("-rf", targetPath);
-            } catch (error) {
-              console.log(error);
-              process.exit();
-            }
-            fs.mkdirSync(targetPath);
-            if (traverse(templatePath, targetPath)) {
-              installDependencies(projectName);
-            }
-          }
-        } else {
-          fs.mkdirSync(targetPath);
-          if (traverse(templatePath, targetPath)) {
-            installDependencies(projectName);
-          }
-        }
-      })
-      .parse(process.argv);
-  } catch (error) {
-    console.log(error);
-  }
-})();
-/*console.warn(
-      `You should use dva-native init <ProjectName> to create you project, do not use dva-native ${command}`
-    );
-})();*/
 
 function mkTargetDir() {
   fs.mkdirSync(targetPath);
@@ -77,8 +45,8 @@ function fsExistsSync(path) {
   }
   return true;
 }
-function copyFile(_targetPath, _templatePath) {
-  fs.writeFileSync(_targetPath, fs.readFileSync(_templatePath), "utf-8");
+function copyFile(targetPath, templatePath) {
+  fs.writeFileSync(targetPath, fs.readFileSync(templatePath), "utf-8");
 }
 function confirm() {
   const terminal = readline.createInterface({
@@ -120,22 +88,96 @@ function traverse(templatePath, targetPath) {
 
 function installDependencies(projectName) {
   console.log("\ninstalling...");
-  shell.exec(`cd ${projectName} && npm install`, err => {
+  shell.exec(`cd ${projectName} && npm install --registry=http://registry.cnpmjs.org`, err => {
     if (err) {
-      console.log(err);
-      process.exit();
+      shell.exec(`cd ${projectName} && npm install`, err => {
+        if (err) {
+          console.log(err);
+        }
+        process.exit();
+      });
     } else {
       console.log(
-        `
-Success! Created ${projectName} at ${cwdPath}.
-Inside that directory, you can run several commands and more:
-  * npm start: Starts you project.
-  * npm test: Run test.
-We suggest that you begin by typing:
-  cd ${projectName}
-  npm start
-Happy hacking!`
+        colors.yellow(
+          [
+            "Success! Created ${projectName} at ${cwdPath}.",
+            "Inside that directory, you can run several commands and more:",
+            "  * npm start: Starts you project.",
+            "  * npm test: Run test.",
+            "We suggest that you begin by typing:",
+            `  cd ${projectName}`,
+            "  npm start",
+            "Happy hacking!"
+          ].join("\n")
+        )
       );
     }
   });
+}
+async function newProject(projectName) {
+  const targetPath = `${cwdPath}/${projectName}`;
+  const backupPath = `${cwdPath}/.${projectName}`;
+  if (fsExistsSync(targetPath)) {
+    if (await confirm()) {
+      try {
+        shell.rm("-rf", targetPath);
+      } catch (error) {
+        console.log(error);
+        process.exit();
+      }
+      fs.mkdirSync(targetPath);
+      if (traverse(templatePath, targetPath)) {
+        rename(targetPath, projectName);
+        installDependencies(projectName);
+      }
+    }
+  } else {
+    fs.mkdirSync(targetPath);
+    if (traverse(templatePath, targetPath)) {
+      rename(targetPath, projectName);
+      installDependencies(projectName);
+    }
+  }
+}
+function newLatestProject(projectName) {
+  shell.exec(`git clone https://github.com/nihgwu/react-native-dva-starter.git`, err => {
+    rename(targetPath, projectName);
+  });
+}
+
+function rename(targetPath, projectName) {
+  try {
+    const paths = fs.readdirSync(targetPath);
+    paths.forEach(subpath => {
+      const subfile = path.resolve(targetPath, subpath);
+      console.log("creating..." + subfile);
+      const newPath = subfile.replace(/DvaStarter/gim, projectName);
+      if (!fs.statSync(newPath).isFile() && newPath === "node_modules") {
+        fs.renameSync(subfile, newPath);
+        rename(newPath, projectName);
+      } else {
+        fs.renameSync(subfile, newPath);
+        fs.writeFileSync(
+          newPath,
+          fs
+            .readFileSync(newPath)
+            .toString()
+            .replace(/DvaStarter/gim, projectName),
+          "utf-8"
+        );
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+try {
+  installReactNativeRename();
+  program.option("-h, --help", help).option("-v, --version", printVersion);
+  program.command("new <projectName>").action(newProject);
+  program.command("git <projectName>").action(newLatestProject);
+  program.parse(process.argv);
+} catch (error) {
+  console.log(error);
 }

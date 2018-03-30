@@ -1,15 +1,22 @@
-# Dva-native-cli
+## dva-native-cli
 
-Dva command line utility for react-native based on **[dva](https://github.com/dvajs/dva)** and **[react-native-dva-starter](https://github.com/nihgwu/react-native-dva-starter)**
+dva command line utility for react-native based on **[dva](https://github.com/dvajs/dva)** and **[react-native-dva-starter](https://github.com/nihgwu/react-native-dva-starter)**
 
-## Start
+### getting started
 
 ``` bash
+## usage
 npm install dva-native-cli
-dva-native new app #your project name
+
+## create your project
+dva-native new app 
 cd app
-react-native run-ios #or run-android
+react-native run-ios # or run-android
+
+## create the latest
+dva-native git app
 ```
 
-## LICENSE
+
+### LICENSE
 MIT
