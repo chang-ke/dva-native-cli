@@ -15,8 +15,27 @@ react-native run-ios # or run-android
 
 ## create the latest
 dva-native git app
+
 ```
 
+### Commands
+
+Two command including `new` and `git`
+
+
+**dva-native new [name]**
+```
+generate a stable project
+```
+
+**dva-native git [name]**
+```
+generate a latest project
+```
+
+**notice**
+if you use new or git but not typing projectname, its default name is app
 
 ### LICENSE
+
 MIT

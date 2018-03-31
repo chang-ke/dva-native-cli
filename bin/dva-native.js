@@ -153,11 +153,12 @@ function newLatestProject(projectName) {
     `git clone https://github.com/nihgwu/react-native-dva-starter.git`,
     err => {
       if (!err) {
+        console.log(projectName)
         renameProject(path.join(cwdPath, "react-native-dva-starter"), projectName);
-        fs.renameSync(path.join(cwdPath, "react-native-dva-starter"), projectName)
+        fs.renameSync(path.join(cwdPath, "react-native-dva-starter"), projectName);
         installDependencies(projectName)
-      }else{
-        console.log(error)
+      } else {
+        console.log(err)
       }
     }
   );
