@@ -16,10 +16,10 @@ function installReactNativeRename() {
       resolve();
     } else {
       shell.exec(
-        "npm install react-native-rename -g --registry=http://registry.cnpmjs.org",
+        "npm install react-native-renameProject -g --registry=http://registry.cnpmjs.org",
         err => {
           if (err) {
-            shell.exec("npm install react-native-rename -g", err => {
+            shell.exec("npm install react-native-renameProject -g", err => {
               if (err) {
                 reject(err);
               }
@@ -30,10 +30,6 @@ function installReactNativeRename() {
       );
     }
   });
-}
-
-function printVersion() {
-  console.log(package.version);
 }
 
 function mkTargetDir() {
@@ -140,14 +136,14 @@ async function newProject(projectName) {
       }
       fs.mkdirSync(targetPath);
       if (copyTemplate(templatePath, targetPath)) {
-        rename(targetPath, projectName);
+        renameProject(targetPath, projectName);
         installDependencies(projectName);
       }
     }
   } else {
     fs.mkdirSync(targetPath);
     if (copyTemplate(templatePath, targetPath)) {
-      rename(targetPath, projectName);
+      renameProject(targetPath, projectName);
       installDependencies(projectName);
     }
   }
@@ -157,13 +153,17 @@ function newLatestProject(projectName) {
     `git clone https://github.com/nihgwu/react-native-dva-starter.git`,
     err => {
       if (!err) {
-        rename(targetPath, projectName);
+        renameProject(path.join(cwdPath, "react-native-dva-starter"), projectName);
+        fs.renameSync(path.join(cwdPath, "react-native-dva-starter"), projectName)
+        installDependencies(projectName)
+      }else{
+        console.log(error)
       }
     }
   );
 }
 
-function rename(targetPath, projectName) {
+function renameProject(targetPath, projectName) {
   try {
     const paths = fs.readdirSync(targetPath);
     paths.forEach(subpath => {
@@ -172,7 +172,7 @@ function rename(targetPath, projectName) {
       const newPath = subfile.replace(/DvaStarter/gim, projectName);
       if (!fs.statSync(subfile).isFile() && subfile !== "images") {
         fs.renameSync(subfile, newPath);
-        rename(newPath, projectName);
+        renameProject(newPath, projectName);
       } else {
         if (subfile !== "gradle-wrapper.jar") {
           fs.renameSync(subfile, newPath);
@@ -194,9 +194,19 @@ function rename(targetPath, projectName) {
 
 try {
   installReactNativeRename();
-  program.option("-h, --help", help).option("-v, --version", printVersion);
+  program.option("-h, --help", help).option("-v, --version", () => {
+    console.log(package.version);
+  });
   program.command("new <projectName>").action(newProject);
   program.command("git <projectName>").action(newLatestProject);
+  program.catch((...argvs) => {
+    console.log(colors.red(`Do not use dva-native ${argvs}`));
+    console.log(
+      "Run " +
+      colors.blue("dva-native --help") +
+      " to get the Commands that dva-native-cli supports"
+    );
+  });
   program.parse(process.argv);
 } catch (error) {
   console.log(error);

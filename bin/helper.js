@@ -1,7 +1,7 @@
 const colors = require("colors");
 module.exports = function help() {
   console.log(
-    colors.red(
+    colors.green(
       [
         "",
         "  Usage: dva-native [command] [options]",

@@ -4,6 +4,8 @@ const Commander = function() {
   this.callback = [];
   this.options = [];
   this.actions = [];
+  this.isCatch = false;
+  this.catchCallback = () => {};
 };
 
 Commander.prototype.option = function(option, cb) {
@@ -22,15 +24,20 @@ Commander.prototype.action = function(fn) {
   const length = cmd.match(/<.+>/).length;
   this.actions.push(() => {
     if (cmd && this.argvs[0] === cmd.split(" ")[0]) {
+      this.isCatch = true;
       fn(...this.argvs.slice(length));
     }
   });
   return this;
 };
 
-Commander.prototype.finally = function(fn){
-
-}
+Commander.prototype.catch = function(fn) {
+  this.catchCallback = () => {
+    if (!this.isCatch) {
+      fn(this.argvs);
+    }
+  };
+};
 
 Commander.prototype.parse = function(argvs) {
   this.argvs = argvs.slice(2);
@@ -44,6 +51,7 @@ Commander.prototype.run = function() {
       this.argvs.forEach(argv => {
         if (argv === item) {
           const cb = this.callback[index];
+          this.isCatch = true;
           if (typeof cb === "function") {
             cb();
           } else {
@@ -56,6 +64,7 @@ Commander.prototype.run = function() {
   this.actions.forEach(action => {
     action();
   });
+  this.catchCallback();
 };
 
 module.exports = new Commander();

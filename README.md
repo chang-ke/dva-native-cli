@@ -2,7 +2,7 @@
 
 dva command line utility for react-native based on **[dva](https://github.com/dvajs/dva)** and **[react-native-dva-starter](https://github.com/nihgwu/react-native-dva-starter)**
 
-### getting started
+### Getting started
 
 ``` bash
 ## usage
