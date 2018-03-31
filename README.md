@@ -23,17 +23,18 @@ dva-native git app
 Two command including `new` and `git`
 
 
-**dva-native new [name]**
+* **dva-native new [name]**
 ```
 generate a stable project
 ```
 
-**dva-native git [name]**
+* **dva-native git [name]**
 ```
 generate a latest project
 ```
 
-**notice**
+* **notice**
+
 if you use new or git but not typing projectname, its default name is app
 
 ### LICENSE
