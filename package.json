@@ -1,6 +1,6 @@
 {
   "name": "dva-native-cli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "The dva command line utility for react-native.",
   "repository": {
     "type": "git",
