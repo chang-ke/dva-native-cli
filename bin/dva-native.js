@@ -10,25 +10,9 @@ const package = require("../package.json");
 const templatePath = path.resolve(__dirname, "../template");
 const program = require("../utils/commander");
 
-function installReactNativeRename() {
-  return new Promise((resolve, reject) => {
-    if (shell.which("git")) {
-      resolve();
-    } else {
-      shell.exec(
-        "npm install react-native-renameProject -g --registry=http://registry.cnpmjs.org",
-        err => {
-          if (err) {
-            shell.exec("npm install react-native-renameProject -g", err => {
-              if (err) {
-                reject(err);
-              }
-            });
-          }
-          resolve();
-        }
-      );
-    }
+function removeGit() {
+  shell.rm("-rf", path.join(cwdPath, "react-native-dva-starter/.git"), err => {
+    console.log(err);
   });
 }
 
@@ -44,6 +28,7 @@ function fsExistsSync(path) {
   }
   return true;
 }
+
 function copyFile(targetPath, templatePath) {
   if (/png/.test(targetPath)) {
     fs.createReadStream(templatePath).pipe(fs.createWriteStream(targetPath));
@@ -51,6 +36,7 @@ function copyFile(targetPath, templatePath) {
     fs.writeFileSync(targetPath, fs.readFileSync(templatePath));
   }
 }
+
 function confirm() {
   const terminal = readline.createInterface({
     input: process.stdin,
@@ -123,6 +109,7 @@ function installDependencies(projectName) {
     }
   );
 }
+
 async function newProject(projectName) {
   const targetPath = `${cwdPath}/${projectName}`;
   const backupPath = `${cwdPath}/.${projectName}`;
@@ -148,17 +135,24 @@ async function newProject(projectName) {
     }
   }
 }
+
 function newLatestProject(projectName) {
   shell.exec(
     `git clone https://github.com/nihgwu/react-native-dva-starter.git`,
     err => {
       if (!err) {
-        console.log(projectName)
-        renameProject(path.join(cwdPath, "react-native-dva-starter"), projectName);
-        fs.renameSync(path.join(cwdPath, "react-native-dva-starter"), projectName);
-        installDependencies(projectName)
+        removeGit();
+        renameProject(
+          path.join(cwdPath, "react-native-dva-starter"),
+          projectName
+        );
+        fs.renameSync(
+          path.join(cwdPath, "react-native-dva-starter"),
+          projectName
+        );
+        installDependencies(projectName);
       } else {
-        console.log(err)
+        console.log(err);
       }
     }
   );
@@ -169,11 +163,12 @@ function renameProject(targetPath, projectName) {
     const paths = fs.readdirSync(targetPath);
     paths.forEach(subpath => {
       const subfile = path.resolve(targetPath, subpath);
-      console.log("creating..." + subfile);
       const newPath = subfile.replace(/DvaStarter/gim, projectName);
-      if (!fs.statSync(subfile).isFile() && subfile !== "images") {
-        fs.renameSync(subfile, newPath);
-        renameProject(newPath, projectName);
+      if (!fs.statSync(subfile).isFile()) {
+        if (subpath !== "images") {
+          fs.renameSync(subfile, newPath);
+          renameProject(newPath, projectName);
+        }
       } else {
         if (subfile !== "gradle-wrapper.jar") {
           fs.renameSync(subfile, newPath);
@@ -182,8 +177,7 @@ function renameProject(targetPath, projectName) {
             fs
               .readFileSync(newPath)
               .toString()
-              .replace(/DvaStarter/gim, projectName),
-            "utf-8"
+              .replace(/DvaStarter/gim, projectName)
           );
         }
       }
@@ -194,7 +188,6 @@ function renameProject(targetPath, projectName) {
 }
 
 try {
-  installReactNativeRename();
   program.option("-h, --help", help).option("-v, --version", () => {
     console.log(package.version);
   });
@@ -204,11 +197,13 @@ try {
     console.log(colors.red(`Do not use dva-native ${argvs}`));
     console.log(
       "Run " +
-      colors.blue("dva-native --help") +
-      " to get the Commands that dva-native-cli supports"
+        colors.blue("dva-native --help") +
+        " to get the Commands that dva-native-cli supports"
     );
   });
   program.parse(process.argv);
 } catch (error) {
   console.log(error);
 }
+
+removeGit();
