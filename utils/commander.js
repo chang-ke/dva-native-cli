@@ -21,7 +21,7 @@ Commander.prototype.command = function (cmd) {
 
 Commander.prototype.action = function (fn) {
   const cmd = this.commands.shift();
-  const length = cmd.match(/<.+>/).length;
+  const length = cmd.match(/<.+?>/).length;
   this.actions.push(() => {
     if (cmd && this.argvs[0] === cmd.split(" ")[0]) {
       this.isCatch = true;
