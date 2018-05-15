@@ -10,15 +10,15 @@ const package = require('../package.json');
 const templatePath = path.resolve(__dirname, '../template');
 const program = require('../utils/commander');
 
-const Regx = (() => {
+const FILENAMEREGX = (() => {
   let regstr = '';
   /**
    * 二进制文件后缀，在rename的时候用来过滤
    */
-  ['png', 'jpg', 'jpeg', 'jar', 'gif'].forEach(e => {
+  ['png', 'jpg', 'jpeg', 'bmp', 'webp', 'jar', 'gif', 'ttf', 'dll', 'svg'].forEach(e => {
     regstr += e + '|';
   });
-  regstr = `\.(${regstr.slice(0, -1)})`
+  regstr = `\.(${regstr.slice(0, -1)})`;
   return new RegExp(regstr);
 })();
 
@@ -101,7 +101,7 @@ function renameProject(targetPath, projectName) {
           renameProject(newPath, projectName);
         }
       } else {
-        if (!Regx.test(subfile)) {
+        if (!FILENAMEREGX.test(subfile)) {
           fs.renameSync(subfile, newPath);
           fs.writeFileSync(
             newPath,
@@ -203,8 +203,8 @@ try {
   program.command('new <project>').action(newProject);
   program.command('git <project>').action(newLatestProject);
   program.catch((...argvs) => {
-    console.log(colors.red(`Do not use dva-native ${argvs}`));
-    console.log('Run ' + colors.blue('dva-native --help') + ' to get the Commands that dva-native-cli supports');
+    console.log(colors.red(`Do not use dvanative ${argvs}`));
+    console.log('Run ' + colors.blue('dvanative --help') + ' to get the Commands that dva-native-cli supports');
   });
   program.parse(process.argv);
 } catch (error) {

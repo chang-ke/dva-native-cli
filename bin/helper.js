@@ -4,13 +4,13 @@ module.exports = function help() {
     colors.green(
       [
         "",
-        "  Usage: dva-native [command] [options]",
+        "  Usage: dvanative [command] [options]",
         "",
         "",
         "  Commands:",
         "",
         "    new <ProjectName> [options]  generates a new project and installs its dependencies",
-        "    git <ProjectName> [options]  generates the latest project",
+        "    git <ProjectName> [options]  generates the latest project and installs its dependencies",
         "",
         "  Options:",
         "",

@@ -9,12 +9,12 @@ dva command line utility for react-native based on **[dva](https://github.com/dv
 npm install dva-native-cli
 
 ## create your project
-dva-native new app 
+dvanative new app 
 cd app
 react-native run-ios # or run-android
 
 ## create the latest
-dva-native git app
+dvanative git app
 
 ```
 
@@ -23,12 +23,12 @@ dva-native git app
 Two command including `new` and `git`
 
 
-* **dva-native new [name]**
+* **dvanative new [name]**
 ```
 generate a stable project
 ```
 
-* **dva-native git [name]**
+* **dvanative git [name]**
 ```
 generate a latest project
 ```

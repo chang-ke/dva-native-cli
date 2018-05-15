@@ -18,7 +18,7 @@
     "shelljs": "^0.7.7"
   },
   "bin": {
-    "dva-native": "./bin/dva-native.js"
+    "dvanative": "./bin/dva-native.js"
   },
   "engines": {
     "node": ">=7.6.0"
