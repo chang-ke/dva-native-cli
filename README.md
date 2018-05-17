@@ -33,10 +33,6 @@ generate a stable project
 generate a latest project
 ```
 
-* **notice**
-
-if you use new or git but not typing projectname, its default name is app
-
 ### LICENSE
 
 MIT

@@ -32,7 +32,6 @@ function removeGit() {
 
 /**
  *
- *
  * @param {string} path
  * @returns {boolean} 路径是否存在
  */
@@ -44,7 +43,12 @@ function fsExistsSync(path) {
   }
   return true;
 }
-
+/**
+ * copy file from templatePath to targetPath
+ * 
+ * @param {string} templatePath 
+ * @param {string} targetPath 
+ */
 function copyFile(templatePath, targetPath) {
   fs.writeFileSync(targetPath, fs.readFileSync(templatePath));
 }
@@ -65,7 +69,13 @@ function confirmOverride() {
     });
   });
 }
-
+/**
+ * copy template
+ * 
+ * @param {string} templatePath 
+ * @param {string} targetPath 
+ * @returns {boolean}
+ */
 function copyTemplate(templatePath, targetPath) {
   try {
     if (fs.statSync(templatePath).isDirectory() && !fsExistsSync(targetPath)) {
@@ -88,7 +98,12 @@ function copyTemplate(templatePath, targetPath) {
   }
   return true;
 }
-
+/**
+ * rename project
+ * 
+ * @param {string} targetPath 
+ * @param {string} projectName 
+ */
 function renameProject(targetPath, projectName) {
   try {
     const paths = fs.readdirSync(targetPath);
@@ -117,7 +132,11 @@ function renameProject(targetPath, projectName) {
     console.log(error);
   }
 }
-
+/**
+ * 
+ * 
+ * @param {string} projectName 
+ */
 function installDependencies(projectName) {
   console.log('\ninstalling...');
   if (shell.exec(`cd ${projectName} && npm install --registry=http://registry.cnpmjs.org`).code) {
@@ -161,7 +180,11 @@ function backupDir(templatePath, backupPath) {
 function removeBackup(backupPath) {
   shell.rm('-rf', backupPath);
 }
-
+/**
+ * 
+ * 
+ * @param {string} projectName 
+ */
 function newLatestProject(projectName) {
   shell.exec(`git clone https://github.com/nihgwu/react-native-dva-starter.git`, error => {
     if (!error) {
@@ -175,7 +198,11 @@ function newLatestProject(projectName) {
     }
   });
 }
-
+/**
+ * 
+ * 
+ * @param {string} projectName 
+ */
 async function newProject(projectName) {
   const targetPath = `${cwdPath}/${projectName}`;
   const backupPath = `${cwdPath}/.${projectName}`;
